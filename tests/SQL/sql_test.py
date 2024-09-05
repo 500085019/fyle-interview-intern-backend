@@ -41,7 +41,7 @@ def create_n_graded_assignments_for_teacher(number: int = 0, teacher_id: int = 1
 
         # Update the grade_a_counter if the grade is 'A'
         if grade == GradeEnum.A:
-            grade_a_counter = grade_a_counter + 1
+            grade_a_counter += 1
 
     # Commit changes to the database
     db.session.commit()
@@ -72,14 +72,15 @@ def test_get_assignments_in_graded_state_for_each_student():
     with open('tests/SQL/number_of_graded_assignments_for_each_student.sql', encoding='utf8') as fo:
         sql = fo.read()
 
-    # Execute the SQL query compare the result with the expected result
+    # Execute the SQL query and compare the result with the expected result
     sql_result = db.session.execute(text(sql)).fetchall()
     for itr, result in enumerate(expected_result):
         assert result[0] == sql_result[itr][0]
+        assert result[1] == sql_result[itr][1]
 
 
 def test_get_grade_A_assignments_for_teacher_with_max_grading():
-    """Test to get count of grade A assignments for teacher which has graded maximum assignments"""
+    """Test to get count of grade A assignments for the teacher who has graded the maximum assignments"""
 
     # Read the SQL query from a file
     with open('tests/SQL/count_grade_A_assignments_by_teacher_with_max_grading.sql', encoding='utf8') as fo:
@@ -87,13 +88,13 @@ def test_get_grade_A_assignments_for_teacher_with_max_grading():
 
     # Create and grade 5 assignments for the default teacher (teacher_id=1)
     grade_a_count_1 = create_n_graded_assignments_for_teacher(5)
-    
+
     # Execute the SQL query and check if the count matches the created assignments
     sql_result = db.session.execute(text(sql)).fetchall()
     actual_grade_a_count = sql_result[0][0]
-    expected_grade_a_count = 2
-    assert actual_grade_a_count == expected_grade_a_count
-    # assert grade_a_count_1 == sql_result[0][0]
+    
+    # Assert that the SQL result matches the created assignments with grade A
+    assert actual_grade_a_count == grade_a_count_1
 
     # Create and grade 10 assignments for a different teacher (teacher_id=2)
     grade_a_count_2 = create_n_graded_assignments_for_teacher(10, 2)
@@ -101,5 +102,6 @@ def test_get_grade_A_assignments_for_teacher_with_max_grading():
     # Execute the SQL query again and check if the count matches the newly created assignments
     sql_result = db.session.execute(text(sql)).fetchall()
     actual_grade_a_count_2 = sql_result[0][0]
-    expected_grade_a_count_2 = 2  # Adjust this value based on the actual grading logic
-    assert actual_grade_a_count_2 == expected_grade_a_count_2
+
+    # Assert that the SQL result matches the newly created assignments with grade A
+    assert actual_grade_a_count_2 == grade_a_count_2
